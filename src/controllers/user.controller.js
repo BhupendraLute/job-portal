@@ -66,10 +66,6 @@ const registerUser = asyncHandler(async (req, res) => {
             new ApiResponse(200, createdUser, "User registered Successfully")
         )
     } catch (error) {
-        if (avatar) {
-            await removeFromCloudinary(avatar.public_id)
-        }
-
         throw new ApiError(500, error.message)
     }
 
