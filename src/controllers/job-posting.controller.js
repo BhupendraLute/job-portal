@@ -88,29 +88,29 @@ const updateJobPost = asyncHandler(async (req, res) => {
 
 const removeJobPost = asyncHandler(async (req, res) => {
     try {
-      const { id } = req.params;
-      const user = req.user;
-  
-      // check user is employer
-      if (user.role !== 'employer') {
-        res.status(401);
-        throw new ApiError(401, 'User not authorized employer, please login as employer');
-      }
-  
-      const jobPost = await JobPost.findByIdAndDelete(id);
-  
-      if (!jobPost) {
-        throw new ApiError(404, "Job posting not found");
-      }
-  
-      return res.status(200).json(
-        new ApiResponse(200, null, "Job posting removed successfully")
-      );
+        const { id } = req.params;
+        const user = req.user;
+
+        // check user is employer
+        if (user.role !== 'employer') {
+            res.status(401);
+            throw new ApiError(401, 'User not authorized employer, please login as employer');
+        }
+
+        const jobPost = await JobPost.findByIdAndDelete(id);
+
+        if (!jobPost) {
+            throw new ApiError(404, "Job posting not found");
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200, null, "Job posting removed successfully")
+        );
     } catch (error) {
-      throw new ApiError(500, error.message || 'Error while removing job post');
+        throw new ApiError(500, error.message || 'Error while removing job post');
     }
-  });
-  
+});
+
 
 const getJobPost = asyncHandler(async (req, res) => {
     try {
@@ -162,7 +162,14 @@ const searchJobPosts = asyncHandler(async (req, res) => {
         const skipCount = (page - 1) * limit;
 
         const jobPosts = await JobPost.find({
-            $text: { $search: q }
+            $or: [
+                { title: { $regex: new RegExp(q, 'i') } },
+                { company: { $regex: new RegExp(q, 'i') } },
+                { salary: { $regex: new RegExp(q, 'i') } },
+                { location: { $regex: new RegExp(q, 'i') } },
+                { description: { $regex: new RegExp(q, 'i') } },
+                { jobType: { $regex: new RegExp(q, 'i') } },
+            ]
         })
             .select("-applications")
             .skip(skipCount)
