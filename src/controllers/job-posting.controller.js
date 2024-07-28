@@ -156,6 +156,27 @@ const getAllJobPosts = asyncHandler(async (req, res) => {
     }
 });
 
+//  get job posts for logged in employer only
+const getJobPostsByEmployer = asyncHandler(async (req, res) => {
+    try {
+        const user = req.user;
+
+        // check user is employer
+        if (user.role !== 'employer') {
+            res.status(401);
+            throw new ApiError(401, 'User not authorized employer, please login as employer');
+        }
+
+        const jobPosts = await JobPost.find({ employer: user._id });
+
+        return res.status(200).json(
+            new ApiResponse(200, jobPosts, "Job posts fetched successfully")
+        );
+    } catch (error) {
+        throw new ApiError(500, error.message || 'Error while fetching job posts');
+    }
+});
+
 const searchJobPosts = asyncHandler(async (req, res) => {
     try {
         const { q, page = 1, limit = 10 } = req.query;
@@ -232,7 +253,7 @@ const applyJob = asyncHandler(async (req, res) => {
         const job = await JobPost.findById(id)
         const resumeLocalPath = req.file?.path
 
-        console.log(resumeLocalPath)
+        // console.log(resumeLocalPath)
 
         const user = await User.findById(applicant._id)
 
@@ -322,6 +343,7 @@ export {
     updateJobPost,
     getJobPost,
     getAllJobPosts,
+    getJobPostsByEmployer,
     searchJobPosts,
     getApplicationsByJobId,
     applyJob,
