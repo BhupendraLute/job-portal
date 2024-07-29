@@ -13,7 +13,7 @@ router.route('/get-my-posts').get(verifyJWT, getJobPostsByEmployer)
 router.route('/search').get(searchJobPosts)
 router.route("/applications/:id").get(verifyJWT, getApplicationsByJobId)
 router.route('/delete/:id').delete(verifyJWT, removeJobPost)
-router.route('/apply/:id').patch(verifyJWT, upload.single("resume"), applyJob)
+router.route('/apply/:id').post(verifyJWT, applyJob)
 router.route('/update-job-status/:id').patch(verifyJWT, updateJobApplicationStatus)
 
 export default router

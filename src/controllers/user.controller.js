@@ -241,6 +241,28 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     }
 })
 
+// get user with id
+const getUserById = asyncHandler(async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select(
+            "-password -refreshToken"
+        )
+        if (!user) {
+            throw new ApiError(404, "User not found")
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                user,
+                "User fetched successfully"
+            ))
+    } catch (error) {
+        throw new ApiError(500, error?.message || "Error while fetching user")
+    }
+})
+
 const updateAccountDetails = asyncHandler(async (req, res) => {
     try {
         const { firstName, middleName, lastName, email, dob } = req.body
@@ -456,5 +478,6 @@ export {
     updateUserAvatar,
     updateResume,
     addExperiance,
-    editExperiance
+    editExperiance,
+    getUserById
 }

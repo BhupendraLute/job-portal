@@ -251,9 +251,7 @@ const applyJob = asyncHandler(async (req, res) => {
         const { id } = req.params; // job-post id
         const applicant = req.user
         const job = await JobPost.findById(id)
-        const resumeLocalPath = req.file?.path
-
-        // console.log(resumeLocalPath)
+        const resume = applicant?.resume ? applicant.resume : null;
 
         const user = await User.findById(applicant._id)
 
@@ -267,17 +265,10 @@ const applyJob = asyncHandler(async (req, res) => {
             throw new ApiError(404, "Job not found")
         }
 
-        if (!resumeLocalPath) {
-            throw new ApiError(400, "Resume file is missing")
-        }
-
-        // check resume is in pdf format
-        checkResumeFormat(resumeLocalPath)
-
         const application = {
             applicant: user._id,
             job: job._id,
-            resume: resumeLocalPath,
+            resume: resume,
         }
 
         const createdApplication = await JobApplication.create(application)
@@ -286,10 +277,9 @@ const applyJob = asyncHandler(async (req, res) => {
             throw new ApiError(500, "Something went wrong while applying for the job")
         }
 
-        job.applications.push({ applicant: applicant._id, resume: resumeLocalPath })
+        job.applications.push({ applicant: applicant._id, resume: resume })
 
         await job.save();
-
 
         return res.status(200).json(
             new ApiResponse(200, null, "Job applied successfully")
@@ -334,6 +324,16 @@ const updateJobApplicationStatus = asyncHandler(async (req, res) => {
         );
     } catch (error) {
         throw new ApiError(500, error.message || "Error while updating application status")
+    }
+});
+
+const downloadResume = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params; // PublicId of resume
+
+        
+    } catch (error) {
+        throw new ApiError(500, error.message || "Error while downloading resume");
     }
 });
 
